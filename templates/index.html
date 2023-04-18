@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title>Digital Forensics</title>
+    <style>
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mt-5">
+                <h1>Digital Forensics</h1>
+                <p>Upload an image or PDF file for analysis.</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <form action="/" method="post" enctype="multipart/form-data" class="text-center" id="analysisForm">
+                    <label for="file" class="btn btn-primary mb-3">Choose File</label>
+                    <input type="file" name="file" id="file" required hidden>
+                    <div id="filePreview" class="mb-3"></div>
+                    <hr>
+                    <div id="image-analysis-options">
+                        
+                        <h4>Select Image Analysis Features:</h4>
+                        <select name="feature" class="form-select">
+                            <option value="ela">Error Level Analysis</option>
+                            <option value="histogram">Histogram Analysis</option>
+                            <option value="metadata">Metadata Analysis</option>
+                            <option value="noise">Noise Analysis</option>
+                            <option value="laplacian">Variance of Laplacian</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-lg btn-submit">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
+
+    <script>
+        const fileInput = document.getElementById('file');
+        const filePreview = document.getElementById('filePreview');
+        const analysisForm = document.getElementById('analysisForm');
+        const imageAnalysisOptions = document.getElementById('image-analysis-options');
+    
+        function toggleImageAnalysisOptions(show) {
+            imageAnalysisOptions.style.display = show ? 'block' : 'none';
+        }
+    
+        fileInput.addEventListener('change', (event) => {
+            const files = event.target.files;
+            if (files.length > 0) {
+                const file = files[0];
+                const reader = new FileReader();
+                if (file.type.startsWith('image/')) {
+                    toggleImageAnalysisOptions(true);
+                    reader.onload = (e) => {
+                        const img = new Image();
+                        img.src = e.target.result;
+                        img.onload = () => {
+                            img.width = 200;
+                            img.height = 200;
+                            filePreview.innerHTML = '';
+                            filePreview.appendChild(img);
+                        };
+                    };
+                    reader.readAsDataURL(file);
+                } else if (file.type === 'application/pdf') {
+                    toggleImageAnalysisOptions(false);
+                    reader.onload = (pdfEvent) => {
+                        const pdfData = new Uint8Array(reader.result);
+    
+                        pdfjsLib.getDocument({ data: pdfData }).promise.then((pdf) => {
+                            return pdf.getPage(1);
+                        }).then((page) => {
+                            const scale = 0.5;
+                            const viewport = page.getViewport({ scale: scale });
+    
+                            const canvas = document.createElement('canvas');
+                            canvas.width = viewport.width;
+                            canvas.height = viewport.height;
+                            filePreview.innerHTML = '';
+                            filePreview.appendChild(canvas);
+    
+                            const context = canvas.getContext('2d');
+    
+                            const renderContext = {
+                                canvasContext: context,
+                                viewport: viewport
+                            };
+    
+                            page.render(renderContext);
+                        });
+                    };
+                    reader.readAsArrayBuffer(file);
+                } else {
+                    toggleImageAnalysisOptions(false);
+                    const unsupported = document.createElement('p');
+                    unsupported.textContent = `${file.name} (Unsupported file type)`;
+                    filePreview.innerHTML = '';
+                    filePreview.appendChild(unsupported);
+                }
+            } else {
+                filePreview.innerHTML = '';
+                toggleImageAnalysisOptions(false);
+            }
+        });
+    
+        analysisForm.addEventListener('submit', (event) => {
+            const fileType = fileInput.files.length > 0 ? fileInput.files[0].type : '';
+    
+            if (fileType.startsWith('image/')) {
+                document.getElementById('pdf').checked = false;
+                document.getElementById('image').checked = true;
+            } else if (fileType === 'application/pdf') {
+                document.getElementById('pdf').checked = true;
+                document.getElementById('image').checked = false;
+            } else {
+                event.preventDefault();
+                alert('Please upload an image or PDF file.');
+            }
+        });
+    
+        // Initialize options visibility
+        toggleImageAnalysisOptions(false);
+    </script>
+    
+    
+    
+</body>
+</html>
+
+</body>
+</html>
+

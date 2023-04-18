@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <title>Noise Analysis</title>
+    <style>
+        .img-fluid:hover {
+            transform: scale(1.2);
+            transition: all 0.5s ease;
+            cursor: zoom-in;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-5">Noise Analysis</h1>
+        <div class="row">
+            <div class="col-6">
+                <h3>Histogram</h3>
+                <img src="data:image/png;base64,{{ histogram_data }}" alt="Histogram" class="img-fluid">
+            </div>
+            <div class="col-6">
+                <h3>Exaggerated Noisy Image</h3>
+                <img src="data:image/png;base64,{{ noise_image_data }}" alt="Exaggerated Noisy Image" class="img-fluid">
+            </div>
+        </div>
+        <div class="row mt-5">
+            <div class="col">
+                <a href="/" class="btn btn-primary">Back</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
